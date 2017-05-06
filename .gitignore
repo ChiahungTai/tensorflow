@@ -18,3 +18,14 @@ node_modules
 __pycache__
 *.swp
 .vscode/
+tensorflow/.cproject
+tensorflow/.project
+tensorflow/examples/android/.idea/
+tensorflow/examples/android/android.iml
+tensorflow/examples/android/gradle/
+tensorflow/examples/android/gradleBuild/
+tensorflow/examples/android/gradlew
+tensorflow/examples/android/gradlew.bat
+tensorflow/examples/android/local.properties
+WORKSPACE
+
