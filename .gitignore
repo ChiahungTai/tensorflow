@@ -27,5 +27,9 @@ tensorflow/examples/android/gradleBuild/
 tensorflow/examples/android/gradlew
 tensorflow/examples/android/gradlew.bat
 tensorflow/examples/android/local.properties
+tensorflow/examples/android/.externalNativeBuild/
+tensorflow/examples/android/.gradle/
+tensorflow/examples/android/assets/
+tensorflow/examples/android/libs/
 WORKSPACE
 

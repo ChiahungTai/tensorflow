@@ -167,6 +167,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
 
   @Override
   public void onImageAvailable(final ImageReader reader) {
+    Test();
     Image image = null;
 
     try {
@@ -275,4 +276,13 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
       borderedText.drawLines(canvas, 10, canvas.getHeight() - 10, lines);
     }
   }
+
+  /*
+   * Loading our Libs
+   */
+  static {
+    System.loadLibrary("ocl_tensor");
+  }
+
+  public static native void Test();
 }
