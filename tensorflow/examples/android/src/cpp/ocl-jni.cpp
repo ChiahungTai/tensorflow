@@ -40,9 +40,6 @@ Java_org_tensorflow_demo_ClassifierActivity_Test(JNIEnv *env, jclass type) {
     if (platform_number == 0) {
         LOGE("There are no any available OpenCL platforms\n");
     }
-
-    LOGE("\n\n  @@@@OpenCL rock %d \n\n", platform_number);
-
 }
 
 }

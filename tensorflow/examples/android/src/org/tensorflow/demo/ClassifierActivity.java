@@ -167,7 +167,6 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
 
   @Override
   public void onImageAvailable(final ImageReader reader) {
-    Test();
     Image image = null;
 
     try {
@@ -191,6 +190,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
       final int yRowStride = planes[0].getRowStride();
       final int uvRowStride = planes[1].getRowStride();
       final int uvPixelStride = planes[1].getPixelStride();
+
       ImageUtils.convertYUV420ToARGB8888(
           yuvBytes[0],
           yuvBytes[1],
