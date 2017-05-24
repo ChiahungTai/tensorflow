@@ -32,4 +32,11 @@ tensorflow/examples/android/.gradle/
 tensorflow/examples/android/assets/
 tensorflow/examples/android/libs/
 WORKSPACE
+tensorflow/.pydevproject
+tensorflow/contrib/android/.classpath
+tensorflow/contrib/android/.gitignore
+tensorflow/contrib/android/.project
+tensorflow/java/.classpath
+tensorflow/java/.gitignore
+tensorflow/java/.project
 
