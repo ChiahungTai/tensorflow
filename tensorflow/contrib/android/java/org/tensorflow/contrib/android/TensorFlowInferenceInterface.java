@@ -80,6 +80,7 @@ public class TensorFlowInferenceInterface {
     InputStream is = null;
     try {
       String aname = hasAssetPrefix ? model.split(ASSET_FILE_PREFIX)[1] : model;
+      Log.i(TAG, "@@@@@@ model = " + aname);
       is = assetManager.open(aname);
     } catch (IOException e) {
       if (hasAssetPrefix) {
@@ -95,7 +96,7 @@ public class TensorFlowInferenceInterface {
     try {
       loadGraph(is, g);
       is.close();
-      Log.i(TAG, "Successfully loaded model from '" + model + "'");
+      Log.i(TAG, "@@@@ Successfully loaded model from '" + model + "'");
     } catch (IOException e) {
       throw new RuntimeException("Failed to load model from '" + model + "'", e);
     }
@@ -401,7 +402,7 @@ public class TensorFlowInferenceInterface {
         "Model load took " + (endMs - startMs) + "ms, TensorFlow version: " + TensorFlow.version());
   }
 
-  private void addFeed(String inputName, Tensor t) {
+  public void addFeed(String inputName, Tensor t) {
     // The string format accepted by TensorFlowInferenceInterface is node_name[:output_index].
     TensorId tid = TensorId.parse(inputName);
     runner.feed(tid.name, tid.outputIndex, t);

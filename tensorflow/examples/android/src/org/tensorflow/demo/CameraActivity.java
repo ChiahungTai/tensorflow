@@ -47,7 +47,7 @@ public abstract class CameraActivity extends Activity implements OnImageAvailabl
   private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
   private static final String PERMISSION_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-  private boolean debug = false;
+  private boolean debug = true;
 
   private Handler handler;
   private HandlerThread handlerThread;
@@ -65,21 +65,21 @@ public abstract class CameraActivity extends Activity implements OnImageAvailabl
     } else {
       requestPermission();
     }
-
-    String[] testCase = new String[]{
-            "商品和服务",
-            "结婚的和尚未结婚的确实在干扰分词啊",
-            "买水果然后来世博园最后去世博会",
-            "中国的首都是北京",
-            "欢迎新老师生前来就餐",
-            "工信处女干事每月经过下属科室都要亲口交代24口交换机等技术性器件的安装工作",
-            "随着页游兴起到现在的页游繁盛，依赖于存档进行逻辑判断的设计减少了，但这块也不能完全忽略掉。",
-    };
-    for (String sentence : testCase)
-    {
-      List<Term> termList = HanLP.segment(sentence);
-      LOGGER.d(termList.toString());
-    }
+//
+//    String[] testCase = new String[]{
+//            "商品和服务",
+//            "结婚的和尚未结婚的确实在干扰分词啊",
+//            "买水果然后来世博园最后去世博会",
+//            "中国的首都是北京",
+//            "欢迎新老师生前来就餐",
+//            "工信处女干事每月经过下属科室都要亲口交代24口交换机等技术性器件的安装工作",
+//            "随着页游兴起到现在的页游繁盛，依赖于存档进行逻辑判断的设计减少了，但这块也不能完全忽略掉。",
+//    };
+//    for (String sentence : testCase)
+//    {
+//      List<Term> termList = HanLP.segment(sentence);
+//      LOGGER.d(termList.toString());
+//    }
 
   }
 

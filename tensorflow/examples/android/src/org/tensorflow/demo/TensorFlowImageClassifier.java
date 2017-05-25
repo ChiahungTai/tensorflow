@@ -30,6 +30,9 @@ import java.util.Vector;
 import org.tensorflow.Operation;
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
+import org.tensorflow.Tensor;
+
+
 /** A classifier specialized to label images using TensorFlow. */
 public class TensorFlowImageClassifier implements Classifier {
   static {
@@ -53,7 +56,8 @@ public class TensorFlowImageClassifier implements Classifier {
   private Vector<String> labels = new Vector<String>();
   private int[] intValues;
   private float[] floatValues;
-  private float[] outputs;
+  private float[] outputsScores;
+  private int[] outputsIndices;
   private String[] outputNames;
 
   private boolean logStats = false;
@@ -107,10 +111,11 @@ public class TensorFlowImageClassifier implements Classifier {
     c.inferenceInterface = new TensorFlowInferenceInterface(assetManager, modelFilename);
 
     // The shape of the output is [N, NUM_CLASSES], where N is the batch size.
-    final Operation operation = c.inferenceInterface.graphOperation(outputName);
-    final int numClasses = (int) operation.output(0).shape().size(1);
-    Log.i(TAG, "Read " + c.labels.size() + " labels, output layer size is " + numClasses);
-
+// Don't need output numClasses
+//    final Operation operation = c.inferenceInterface.graphOperation(outputName);
+//    final int numClasses = (int) operation.output(0).shape().size(1);
+//    Log.i(TAG, "Read " + c.labels.size() + " labels, output layer size is " + numClasses);
+    final int numClasses = 1;
     // Ideally, inputSize could have been retrieved from the shape of the input operation.  Alas,
     // the placeholder node for input in the graphdef typically used does not specify a shape, so it
     // must be passed in as a parameter.
@@ -119,10 +124,11 @@ public class TensorFlowImageClassifier implements Classifier {
     c.imageStd = imageStd;
 
     // Pre-allocate buffers.
-    c.outputNames = new String[] {outputName};
+    c.outputNames = new String[] {outputName+":0", outputName+":1"};
     c.intValues = new int[inputSize * inputSize];
-    c.floatValues = new float[inputSize * inputSize * 3];
-    c.outputs = new float[numClasses];
+    c.floatValues = new float[inputSize * inputSize];
+    c.outputsScores = new float[numClasses];
+    c.outputsIndices = new int[numClasses];
 
     return c;
   }
@@ -136,17 +142,29 @@ public class TensorFlowImageClassifier implements Classifier {
     // Preprocess the image data from 0-255 int to normalized float based
     // on the provided parameters.
     bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
+    int gray;
     for (int i = 0; i < intValues.length; ++i) {
       final int val = intValues[i];
-      floatValues[i * 3 + 0] = (((val >> 16) & 0xFF) - imageMean) / imageStd;
-      floatValues[i * 3 + 1] = (((val >> 8) & 0xFF) - imageMean) / imageStd;
-      floatValues[i * 3 + 2] = ((val & 0xFF) - imageMean) / imageStd;
+      int R = (((val >> 16) & 0xFF) - imageMean);
+      int G = (((val >> 8) & 0xFF) - imageMean);
+      int B = ((val & 0xFF) - imageMean);
+      gray = 299*R + 587*G + B*114;
+      floatValues[i] = (gray) / imageStd;
     }
     Trace.endSection();
 
     // Copy the input data into TensorFlow.
     Trace.beginSection("feed");
-    inferenceInterface.feed(inputName, floatValues, 1, inputSize, inputSize, 3);
+    inferenceInterface.feed(inputName, floatValues, 1, inputSize, inputSize, 1);
+
+    Tensor keepprob = Tensor.create((float)1.0);
+    String keep_prob = "keep_prob";
+    inferenceInterface.addFeed(keep_prob, keepprob);
+
+    Tensor trainflag = Tensor.create(false);
+    String train_flag = "train_flag";
+    inferenceInterface.addFeed(train_flag, trainflag);
+
     Trace.endSection();
 
     // Run the inference call.
@@ -156,32 +174,44 @@ public class TensorFlowImageClassifier implements Classifier {
 
     // Copy the output Tensor back into the output array.
     Trace.beginSection("fetch");
-    inferenceInterface.fetch(outputName, outputs);
+    inferenceInterface.fetch(outputName + ":0", outputsScores);
+    inferenceInterface.fetch(outputName + ":1", outputsIndices);
     Trace.endSection();
 
+    for (int i = 0; i < outputsIndices.length; ++i) {
+      Log.i(TAG, "outputsIndices = " + outputsIndices[0] + " outputsScores = " + outputsScores[0]);
+    }
+
     // Find the best classifications.
-    PriorityQueue<Recognition> pq =
-        new PriorityQueue<Recognition>(
-            3,
-            new Comparator<Recognition>() {
-              @Override
-              public int compare(Recognition lhs, Recognition rhs) {
-                // Intentionally reversed to put high confidence at the head of the queue.
-                return Float.compare(rhs.getConfidence(), lhs.getConfidence());
-              }
-            });
-    for (int i = 0; i < outputs.length; ++i) {
-      if (outputs[i] > THRESHOLD) {
-        pq.add(
-            new Recognition(
-                "" + i, labels.size() > i ? labels.get(i) : "unknown", outputs[i], null));
-      }
-    }
+//    PriorityQueue<Recognition> pq =
+//        new PriorityQueue<Recognition>(
+//            3,
+//            new Comparator<Recognition>() {
+//              @Override
+//              public int compare(Recognition lhs, Recognition rhs) {
+//                // Intentionally reversed to put high confidence at the head of the queue.
+//                return Float.compare(rhs.getConfidence(), lhs.getConfidence());
+//              }
+//            });
     final ArrayList<Recognition> recognitions = new ArrayList<Recognition>();
-    int recognitionsSize = Math.min(pq.size(), MAX_RESULTS);
-    for (int i = 0; i < recognitionsSize; ++i) {
-      recognitions.add(pq.poll());
+
+    for (int i = 0; i < outputsIndices.length; ++i) {
+      recognitions.add(new Recognition(Integer.toString(outputsIndices[i]),
+              labels.size() > i ? labels.get(outputsIndices[i]) : "unknown",
+              outputsScores[i], null));
+
+//      if (outputs[i] > THRESHOLD) {
+//        pq.add(
+//            new Recognition(
+//                "" + i, labels.size() > i ? labels.get(i) : "unknown", outputs[i], null));
+//      }
     }
+
+//    final ArrayList<Recognition> recognitions = new ArrayList<Recognition>();
+//    int recognitionsSize = 1;//Math.min(pq.size(), MAX_RESULTS);
+//    for (int i = 0; i < recognitionsSize; ++i) {
+//      recognitions.add(pq.poll());
+//    }
     Trace.endSection(); // "recognizeImage"
     return recognitions;
   }

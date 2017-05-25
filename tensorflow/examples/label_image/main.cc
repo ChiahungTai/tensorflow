@@ -287,7 +287,7 @@ Status PrintTopLabels(const std::vector<Tensor>& outputs,
   LOG(INFO) << "scores"<<scores.DebugString();
 
   tensorflow::TTypes<int32>::Flat indices_flat = indices.flat<int32>();
-  LOG(INFO) << "indices"<<indices.DebugString();
+  LOG(INFO) << "indices"<<indices.DebugString() << labels[indices_flat(0)];
 
   //  for (int pos = 0; pos < how_many_labels; ++pos) {
 //    const int label_index = indices_flat(pos);
@@ -348,11 +348,14 @@ int main(int argc, char* argv[]) {
   // They define where the graph and input data is located, and what kind of
   // input the model expects. If you train your own model, or use something
   // other than inception_v3, then you'll need to update these.
-  string image = "tensorflow/examples/label_image/data/31-70110.png";
+//  string image = "tensorflow/examples/label_image/data/31-70110.png";
+  string image = "tensorflow/examples/label_image/data/18699035_1328987743836940_113214797_o.jpg";
   string graph =
-      "tensorflow/examples/label_image/data/forzen-chinese-rec-model4501.0.pb";
+      "tensorflow/examples/label_image/data/forzen-chinese-rec-model14001.0.pb";
+//  string labels =
+//      "tensorflow/examples/label_image/data/imagenet_slim_labels.txt";
   string labels =
-      "tensorflow/examples/label_image/data/imagenet_slim_labels.txt";
+      "tensorflow/examples/label_image/data/char_list.txt";
   int32 input_width = 64;
   int32 input_height = 64;
   int32 input_mean = 0;

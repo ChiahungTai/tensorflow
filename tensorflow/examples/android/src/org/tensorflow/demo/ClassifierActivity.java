@@ -31,6 +31,8 @@ import android.os.Trace;
 import android.util.Size;
 import android.util.TypedValue;
 import android.view.Display;
+
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Vector;
 import org.tensorflow.demo.OverlayView.DrawCallback;
@@ -38,6 +40,7 @@ import org.tensorflow.demo.env.BorderedText;
 import org.tensorflow.demo.env.ImageUtils;
 import org.tensorflow.demo.env.Logger;
 import org.tensorflow.demo.R;
+import android.graphics.ColorMatrixColorFilter;
 
 public class ClassifierActivity extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
@@ -58,15 +61,25 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   // --input_node_names="Mul" \
   // --output_node_names="final_result" \
   // --input_binary=true
-  private static final int INPUT_SIZE = 224;
-  private static final int IMAGE_MEAN = 117;
-  private static final float IMAGE_STD = 1;
-  private static final String INPUT_NAME = "input";
-  private static final String OUTPUT_NAME = "output";
+  private static final int INPUT_SIZE = 64;
+//  private static final int INPUT_SIZE = 224;
+//  private static final int IMAGE_MEAN = 117;
+  private static final int IMAGE_MEAN = 0;
+  private static final float IMAGE_STD = 255000;
+//private static final float IMAGE_STD = 1000;
 
-  private static final String MODEL_FILE = "file:///android_asset/tensorflow_inception_graph.pb";
+  //  private static final float IMAGE_STD = 1;
+//  private static final String INPUT_NAME = "input";
+  private static final String INPUT_NAME = "image_batch";
+//  private static final String OUTPUT_NAME = "output";
+  private static final String OUTPUT_NAME = "top_k";
+
+//  private static final String MODEL_FILE = "file:///android_asset/tensorflow_inception_graph.pb";
+  private static final String MODEL_FILE = "file:///android_asset/forzen-chinese-rec-model14001.0.pb";
+//  private static final String LABEL_FILE =
+//      "file:///android_asset/imagenet_comp_graph_label_strings.txt";
   private static final String LABEL_FILE =
-      "file:///android_asset/imagenet_comp_graph_label_strings.txt";
+          "file:///android_asset/char_list.txt";
 
   private static final boolean SAVE_PREVIEW_BITMAP = false;
 
@@ -82,8 +95,13 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   private int previewHeight = 0;
   private byte[][] yuvBytes;
   private int[] rgbBytes = null;
+
+  private int[] intValues = new int[INPUT_SIZE * INPUT_SIZE];
+  private float[] floatValues = new float[INPUT_SIZE * INPUT_SIZE];
+
   private Bitmap rgbFrameBitmap = null;
   private Bitmap croppedBitmap = null;
+  private Bitmap grayBitmap = null;
 
   private Bitmap cropCopyBitmap;
 
@@ -165,6 +183,8 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
         });
   }
 
+
+
   @Override
   public void onImageAvailable(final ImageReader reader) {
     Image image = null;
@@ -202,6 +222,18 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
           uvPixelStride,
           rgbBytes);
 
+//      for (int h = 0; h < previewHeight; h++) {
+//        for (int w = 0; w < previewWidth; w++) {
+//          rgbBytes[w*h + w] = 1;
+////          rgbBytes[w*h + w+1] = 0;
+////          rgbBytes[w*h + w+2] = 0;
+////          rgbBytes[w*h + w] = yuvBytes[0][yRowStride*h + w];
+////          rgbBytes[w*h + w + 1] = yuvBytes[0][yRowStride*h + w];
+////          rgbBytes[w*h + w + 2] = yuvBytes[0][yRowStride*h + w];
+////          rgbBytes[w*h + w + 3] = yuvBytes[0][yRowStride*h + w];
+////          rgbBytes[w*h + w + 3] = 1;
+//        }
+//      }
       image.close();
     } catch (final Exception e) {
       if (image != null) {
