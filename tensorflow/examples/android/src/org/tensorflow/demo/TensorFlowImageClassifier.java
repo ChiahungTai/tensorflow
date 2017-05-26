@@ -43,7 +43,7 @@ public class TensorFlowImageClassifier implements Classifier {
 
   // Only return this many results with at least this confidence.
   private static final int MAX_RESULTS = 3;
-  private static final float THRESHOLD = 0.1f;
+  private static final float THRESHOLD = 0.3f;
 
   // Config values.
   private String inputName;
@@ -196,15 +196,11 @@ public class TensorFlowImageClassifier implements Classifier {
     final ArrayList<Recognition> recognitions = new ArrayList<Recognition>();
 
     for (int i = 0; i < outputsIndices.length; ++i) {
-      recognitions.add(new Recognition(Integer.toString(outputsIndices[i]),
-              labels.size() > i ? labels.get(outputsIndices[i]) : "unknown",
-              outputsScores[i], null));
-
-//      if (outputs[i] > THRESHOLD) {
-//        pq.add(
-//            new Recognition(
-//                "" + i, labels.size() > i ? labels.get(i) : "unknown", outputs[i], null));
-//      }
+      if (outputsScores[i] > THRESHOLD) {
+          recognitions.add(new Recognition(Integer.toString(outputsIndices[i]),
+                  labels.size() > i ? labels.get(outputsIndices[i]) : "unknown",
+                  outputsScores[i], null));
+      }
     }
 
 //    final ArrayList<Recognition> recognitions = new ArrayList<Recognition>();

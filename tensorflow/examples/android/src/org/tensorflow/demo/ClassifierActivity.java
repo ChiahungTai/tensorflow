@@ -75,7 +75,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   private static final String OUTPUT_NAME = "top_k";
 
 //  private static final String MODEL_FILE = "file:///android_asset/tensorflow_inception_graph.pb";
-  private static final String MODEL_FILE = "file:///android_asset/forzen-chinese-rec-model14001.0.pb";
+  private static final String MODEL_FILE = "file:///android_asset/forzen-chinese-rec-model30001.0.pb";
 //  private static final String LABEL_FILE =
 //      "file:///android_asset/imagenet_comp_graph_label_strings.txt";
   private static final String LABEL_FILE =
